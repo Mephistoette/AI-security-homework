@@ -46,30 +46,7 @@ def main():
 
 
 
-    def evaluate_accuracy_gpu(net, data_iter, device=None): #@save
-        """使用GPU计算模型在数据集上的精度"""
-        if isinstance(net, nn.Module):
-            net.eval()  # 设置为评估模式
-            if not device:
-                device = next(iter(net.parameters())).device
-        valid_loss, vaild_acc_sum, valid_prednum_sum = 0., 0., 0.
-        with torch.no_grad():
-            for X, y in data_iter:
-                if isinstance(X, list):
-                    # BERT微调所需的（之后将介绍）
-                    X = [x.to(device) for x in X]
-                else:
-                    X = X.to(device)
-                y = y.to(device)
-                outputs = net(X)
-                l = loss(outputs, y)
-
-                vaild_acc, valid_prednum = accuracy(outputs, y)
-                vaild_acc_sum += vaild_acc
-                valid_prednum_sum += valid_prednum
-                valid_loss += l.sum()
-        return valid_loss, vaild_acc_sum, valid_prednum_sum
-
+  
     def try_all_gpus():
         """返回所有可用的GPU,如果没有GPU,则返回[cpu(),]"""
         devices = [torch.device(f'cuda:{i}') for i in range(torch.cuda.device_count())]
@@ -132,6 +109,29 @@ def main():
         with torch.no_grad():
             train_acc_sum, train_prednum = accuracy(pred, y)
         return train_loss_sum, train_acc_sum, train_prednum
+  def evaluate_accuracy_gpu(net, data_iter, device=None): #@save
+        """使用GPU计算模型在数据集上的精度"""
+        if isinstance(net, nn.Module):
+            net.eval()  # 设置为评估模式
+            if not device:
+                device = next(iter(net.parameters())).device
+        valid_loss, vaild_acc_sum, valid_prednum_sum = 0., 0., 0.
+        with torch.no_grad():
+            for X, y in data_iter:
+                if isinstance(X, list):
+                    # BERT微调所需的（之后将介绍）
+                    X = [x.to(device) for x in X]
+                else:
+                    X = X.to(device)
+                y = y.to(device)
+                outputs = net(X)
+                l = loss(outputs, y)
+
+                vaild_acc, valid_prednum = accuracy(outputs, y)
+                vaild_acc_sum += vaild_acc
+                valid_prednum_sum += valid_prednum
+                valid_loss += l.sum()
+        return valid_loss, vaild_acc_sum, valid_prednum_sum
 
     def train(net, train_iter, valid_iter, num_epochs, lr, wd, devices, lr_period, lr_decay):
 
