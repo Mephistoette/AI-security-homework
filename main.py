@@ -93,25 +93,7 @@ def main():
         devices = [torch.device(f'cuda:{i}') for i in range(torch.cuda.device_count())]
         return devices if devices else [torch.device('cpu')]
 
-    def get_net():
-        classes = ('plane', 'car', 'bird', 'cat', 'deer',
-                   'dog', 'frog', 'horse', 'ship', 'truck')
-        net = models.resnet18(pretrained=True)
-        # for param in net.parameters():
-        # param.requires_grad = False
-        net_fit = net.fc.in_features
-        net.fc = torch.nn.Linear(net_fit, 10)
-        # net = nn.Sequential(nn.Linear(net_fit, 10), nn.Softmax(dim=1))
-        return net
-
-        # net = get_net()
-
-        # devices=torch.device("cuda:0" if torch.cuda.is_available() else"cpu")
-        # devices = [torch.device(f'cuda:{i}') for i in range(torch.cuda.device_count())]
-
-        # print(net)
-        # optimizer = torch.optim.SGD(net.parameters(), lr=2e-4, momentum=0.9, weight_decay=5e-4) #weight_decay为权重衰减  amsgrad=True
-        # scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=4,gamma=0.9) #优化lr,每隔 lr_period个epoch就给当前的lr乘以lr_decay
+    
 
     def accuracy(pred, target):
         correct = 0.
@@ -183,7 +165,25 @@ def main():
     devices, num_epochs, lr, wd = try_all_gpus(), 10, 1e-3, 5e-3
     lr_period, lr_decay, net = 4, 0.8, get_net()
     train(net, trainloader, testloader, num_epochs, lr, wd, devices, lr_period, lr_decay)
+def get_net():
+        classes = ('plane', 'car', 'bird', 'cat', 'deer',
+                   'dog', 'frog', 'horse', 'ship', 'truck')
+        net = models.resnet18(pretrained=True)
+        # for param in net.parameters():
+        # param.requires_grad = False
+        net_fit = net.fc.in_features
+        net.fc = torch.nn.Linear(net_fit, 10)
+        # net = nn.Sequential(nn.Linear(net_fit, 10), nn.Softmax(dim=1))
+        return net
 
+        # net = get_net()
+
+        # devices=torch.device("cuda:0" if torch.cuda.is_available() else"cpu")
+        # devices = [torch.device(f'cuda:{i}') for i in range(torch.cuda.device_count())]
+
+        # print(net)
+        # optimizer = torch.optim.SGD(net.parameters(), lr=2e-4, momentum=0.9, weight_decay=5e-4) #weight_decay为权重衰减  amsgrad=True
+        # scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=4,gamma=0.9) #优化lr,每隔 lr_period个epoch就给当前的lr乘以lr_decay
 if __name__ == '__main__':
     main()
     #训练和验证
